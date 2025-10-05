@@ -1,23 +1,161 @@
-<!-- yellow.html -->
-<!doctype html>
-<html lang="ar">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>صفحة صفراء</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لعبة التجميع</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Telegram WebApp JS -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background-color: #FFD700; /* أصفر ذهبي */
-      min-height: 100vh;
-    }
+      body {
+          background: linear-gradient(135deg, #0d6efd, #6610f2);
+          color: white;
+          text-align: center;
+          padding: 20px;
+          font-family: 'Cairo', sans-serif;
+      }
+      .circle-btn {
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          font-size: 1.8rem;
+          font-weight: bold;
+          background-color: #ffc107;
+          color: #000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 20px auto;
+          border: none;
+          box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+          transition: transform 0.1s ease, box-shadow 0.2s ease;
+      }
+      .circle-btn:active {
+          transform: scale(0.95);
+          box-shadow: 0 5px 10px rgba(0,0,0,0.4);
+      }
+      .upgrade-btn {
+          margin: 10px auto;
+      }
+      .card {
+          color: black;
+      }
   </style>
 </head>
 <body>
-  <!-- الصفحة مقصودة فارغة بخلفية صفراء -->
+  <div class="container">
+      <h1 class="my-3">💰 لعبة التجميع</h1>
+      <h4>رصيدك الحالي:</h4>
+      <h2 id="points">0</h2>
+
+      <!-- زر التجميع -->
+      <button id="collectBtn" class="circle-btn">+1</button>
+
+      <!-- بطاقات التحويل -->
+      <div class="row mt-4">
+          <div class="col-12 col-md-6 mb-2">
+              <div class="card p-3">
+                  <h5>تحويل 1000 وحدة موبايل</h5>
+                  <p>🔑 يتطلب 10,000 نقطة</p>
+                  <button class="btn btn-success w-100" onclick="redeem(10000, 1000)">تحويل</button>
+              </div>
+          </div>
+          <div class="col-12 col-md-6 mb-2">
+              <div class="card p-3">
+                  <h5>تحويل 2000 وحدة موبايل</h5>
+                  <p>🔑 يتطلب 20,000 نقطة</p>
+                  <button class="btn btn-success w-100" onclick="redeem(20000, 2000)">تحويل</button>
+              </div>
+          </div>
+          <div class="col-12 col-md-6 mb-2">
+              <div class="card p-3">
+                  <h5>تحويل 3000 وحدة موبايل</h5>
+                  <p>🔑 يتطلب 30,000 نقطة</p>
+                  <button class="btn btn-success w-100" onclick="redeem(30000, 3000)">تحويل</button>
+              </div>
+          </div>
+          <div class="col-12 col-md-6 mb-2">
+              <div class="card p-3">
+                  <h5>تحويل 5000 وحدة موبايل</h5>
+                  <p>🔑 يتطلب 50,000 نقطة</p>
+                  <button class="btn btn-success w-100" onclick="redeem(50000, 5000)">تحويل</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- زر الترقية -->
+      <div class="mt-4">
+          <button id="upgradeBtn" class="btn btn-warning upgrade-btn">⚡ ترقية التجميع</button>
+          <p>سعر الترقية الحالية: <span id="upgradeCost">50</span> نقطة</p>
+          <p>قيمة النقرة: <span id="collectValue">1</span> نقطة</p>
+      </div>
+  </div>
+
+  <script>
+      // تهيئة Telegram WebApp
+      const tg = window.Telegram.WebApp;
+      tg.expand(); // فتح الصفحة بعرض كامل
+
+      // جلب العناصر
+      const pointsEl = document.getElementById("points");
+      const collectBtn = document.getElementById("collectBtn");
+      const upgradeBtn = document.getElementById("upgradeBtn");
+      const upgradeCostEl = document.getElementById("upgradeCost");
+      const collectValueEl = document.getElementById("collectValue");
+
+      // القيم الافتراضية
+      let points = parseInt(localStorage.getItem("points")) || 0;
+      let collectValue = parseInt(localStorage.getItem("collectValue")) || 1;
+      let upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 50;
+
+      // تحديث الواجهة
+      pointsEl.textContent = points;
+      collectValueEl.textContent = collectValue;
+      upgradeCostEl.textContent = upgradeCost;
+
+      // حدث التجميع
+      collectBtn.addEventListener("click", () => {
+          points += collectValue;
+          localStorage.setItem("points", points);
+          pointsEl.textContent = points;
+      });
+
+      // حدث الترقية
+      upgradeBtn.addEventListener("click", () => {
+          if (points >= upgradeCost) {
+              points -= upgradeCost;
+              collectValue *= 2;
+              upgradeCost *= 2;
+              localStorage.setItem("points", points);
+              localStorage.setItem("collectValue", collectValue);
+              localStorage.setItem("upgradeCost", upgradeCost);
+              pointsEl.textContent = points;
+              collectValueEl.textContent = collectValue;
+              upgradeCostEl.textContent = upgradeCost;
+              alert("🎉 تمت الترقية! النقرة الآن = " + collectValue);
+          } else {
+              alert("❌ ليس لديك نقاط كافية للترقية!");
+          }
+      });
+
+      // التحويل
+      function redeem(requiredPoints, units) {
+          if (points >= requiredPoints) {
+              points -= requiredPoints;
+              localStorage.setItem("points", points);
+              pointsEl.textContent = points;
+              alert(`✅ تم تحويل ${units} وحدة موبايل!`);
+          } else {
+              alert("❌ ليس لديك نقاط كافية لهذا التحويل!");
+          }
+      }
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
